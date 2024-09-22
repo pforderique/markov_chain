@@ -1,9 +1,10 @@
 package main
 
-import "fmt"
-
-// import "markov_chain/matrix"
+import (
+	"fmt"
+	// "github.com/pforderique/markov_chain/matrix"
+)
 
 func main() {
-	fmt.Println("Testing")
+	fmt.Println("yo")
 }
