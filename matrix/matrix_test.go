@@ -112,21 +112,26 @@ func TestSet(t *testing.T) {
 	}
 
 	tests := []struct {
+		name string
 		coords   []int
 		value    float64
 		expected []float64
 	}{
-		{[]int{0, 0}, 10, []float64{10, 2, 3, 4, 5, 6, 7, 8, 9}},
-		{[]int{1, 1}, 20, []float64{10, 2, 3, 4, 20, 6, 7, 8, 9}},
-		{[]int{2, 2}, 30, []float64{10, 2, 3, 4, 20, 6, 7, 8, 30}},
+		{"Triangle1", []int{0, 0}, 10, []float64{10, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{"Triangle2", []int{1, 1}, 20, []float64{10, 2, 3, 4, 20, 6, 7, 8, 9}},
+		{"Triangle3", []int{2, 2}, 30, []float64{10, 2, 3, 4, 20, 6, 7, 8, 30}},
 	}
 
 	for _, test := range tests {
-		matrix.Set(test.coords, test.value)
-		if !reflect.DeepEqual(matrix.data, test.expected) {
-			t.Fatalf(`Failed to set value at %v. Expected %v, got %v`,
-				test.coords, test.expected, matrix.data)
-		}
+		testname := test.name
+		// Cannot call t.Parallel since we are changing the matrix
+		t.Run(testname, func(t *testing.T) {
+			matrix.Set(test.coords, test.value)
+			if !reflect.DeepEqual(matrix.data, test.expected) {
+				t.Fatalf(`Failed to set value at %v. Expected %v, got %v`,
+					test.coords, test.expected, matrix.data)
+			}
+		})
 	}
 }
 
@@ -173,10 +178,14 @@ func TestMultiply(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result := test.A.Multiply(test.B)
-		if !reflect.DeepEqual(result.data, test.want.data) {
-			t.Fatalf("\nTest case FAILED: %s\nExpected\n%s, got\n%s",
-				test.name, test.want.String(), result.String())
-		}
+		testname := test.name
+		t.Run(testname, func(t *testing.T) {
+			t.Parallel()
+			result := test.A.Multiply(test.B)
+			if !reflect.DeepEqual(result.data, test.want.data) {
+				t.Fatalf("\nTest case FAILED: %s\nExpected\n%s, got\n%s",
+					test.name, test.want.String(), result.String())
+			}
+		})
 	}
 }
