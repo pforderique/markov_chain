@@ -19,21 +19,47 @@ func (A Matrix) Size() int {
 	return size
 }
 
+func (A Matrix) stride(dim int) int {
+    stride := 1
+    for i := dim + 1; i < len(A.dims); i++ {
+        stride *= A.dims[i]
+    }
+    return stride
+}
+
 func (A Matrix) Get(coors ...int) float64 {
-	if len(coors) != len(A.dims) {
-		panic(fmt.Sprintf(
-		`Coordinate length %d does not match matrix dimensions length of 
-		%d`, len(coors), len(A.dims)))
-	}
+    if len(coors) != len(A.dims) {
+        panic(fmt.Sprintf(
+            `Coordinate length %d does not match matrix dimensions length of 
+            %d`, len(coors), len(A.dims)))
+    }
 
-	data_idx := 0
-	for idx, coor := range coors[:len(coors)-1] {
-		data_idx += coor*A.dims[idx]
-	}
+    index := 0
+    for i, dim := range A.dims {
+        if coors[i] >= dim || coors[i] < 0 {
+            panic(fmt.Sprintf("Index %d out of range for dimension %d", coors[i], i))
+        }
+        index += coors[i] * A.stride(i)
+    }
 
-	data_idx += coors[len(coors)-1]
+    return A.data[index]
+}
 
-	return A.data[data_idx]
+func (A *Matrix) Set(coors []int, value float64) {
+    if len(coors) != len(A.dims) {
+        panic(fmt.Sprintf(
+            "Coor length %d != dimensions length %d", len(coors), len(A.dims)))
+    }
+
+    index := 0
+    for i, dim := range A.dims {
+        if coors[i] >= dim || coors[i] < 0 {
+            panic(fmt.Sprintf("Index %d out of range for dimension %d", coors[i], i))
+        }
+        index += coors[i] * A.stride(i)
+    }
+
+    A.data[index] = value
 }
 
 func (A Matrix) String() string {
@@ -72,21 +98,40 @@ func (A Matrix) String() string {
 	return s
 }
 
-func (A Matrix) Add(B Matrix) Matrix {
+func (A *Matrix) Add(B *Matrix) *Matrix {
 	if !reflect.DeepEqual(A.dims, B.dims) {
 		panic(fmt.Sprintf(
 			"Cannot add Matrix with dimensions %v and %v", A.dims, B.dims))
 	}
-	sumData := make([]float64, len(A.data))
-	for i := range A.data {
-		sumData[i] = A.data[i] + B.data[i]
+	for i := range B.data {
+		A.data[i] = A.data[i] + B.data[i]
 	}
-	return Matrix{
-		data: sumData,
-		dims: A.dims,
-	}
-}  
+	return A
+}
 
-// func matrixMultiplySimple(A *Matrix, B *Matrix) (C *Matrix) {
-// 	return C
-// }
+func (A *Matrix) Multiply(B *Matrix) *Matrix {
+	if len(A.dims) != len(B.dims) || len(B.dims) != 2 {
+		panic("Both matrices must be 2D")
+	}
+	if A.dims[1] != B.dims[0] {
+		panic(fmt.Sprintf(
+			"Matrix dimensions %v x %v cannot be multiplied", A.dims, B.dims))
+	}
+	return matrixMultiplySimple(A, B)
+}
+
+func matrixMultiplySimple(A *Matrix, B *Matrix) *Matrix {
+	I, J, K := A.dims[0], A.dims[1], B.dims[1]
+
+	C := Matrix{make([]float64, I*K), []int{I, K}}
+	for i:=0; i<I; i++ {
+		for k:=0; k<K; k++ {
+			var value float64 = 0;
+			for j:=0; j<J; j++ {
+				value += A.Get(i, j) * B.Get(j, k)
+			}
+			C.Set([]int{i, k}, value)
+		}
+	}
+	return &C
+}

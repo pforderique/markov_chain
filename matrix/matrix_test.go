@@ -5,8 +5,9 @@ import (
 	"testing"
 )
 
-// TestSize calls Matrix's Size() module with a 3x3 Matrix.
+// TestSize calls Matrix's Size() module with a 3x3 Matrix. !
 func TestSize(t *testing.T) {
+	t.Parallel()
     A := Matrix{
 		[]float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		[]int{3, 3},
@@ -20,19 +21,22 @@ func TestSize(t *testing.T) {
 
 // TestGet calls Matrix.Get with multidimensional coordinates
 func TestGetSuccess(t *testing.T) {
+	t.Parallel()
 	matricies := []Matrix{
 		{[]float64{1, 2, 3, 4}, []int{4}},
+		{[]float64{1, 2, 3, 4}, []int{4, 1}},
 		{[]float64{1, 2, 3, 4}, []int{2, 2}},
 		{[]float64{1, 2, 3, 4, 5, 6, 7, 8}, []int{2, 2, 2}},
 	}
 
 	coordinateGroups := [][]int{
 		{3},
+		{2, 0},
 		{1, 0},
 		{0, 1, 0},
 	}
 
-	expecteds := []float64{4, 3, 3}
+	expecteds := []float64{4, 3, 3, 3}
 
 	for t_idx, matrix := range matricies {
 		coors := coordinateGroups[t_idx]
@@ -47,6 +51,7 @@ func TestGetSuccess(t *testing.T) {
 
 // TestString calles Matrix.String with multidimensional coordinates
 func TestString(t *testing.T) {
+	t.Parallel()
 	matricies := []Matrix{
 		{[]float64{1, 2, 3, 4}, []int{4}},
 		{[]float64{1, 2, 3, 4}, []int{2, 2}},
@@ -72,6 +77,7 @@ func TestString(t *testing.T) {
 
 // TestAdd calles Matrix.Add with multidimensional coordinates
 func TestAdd(t *testing.T) {
+	t.Parallel()
 	A := Matrix{
 		[]float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
 		[]int{3, 3},
@@ -82,7 +88,7 @@ func TestAdd(t *testing.T) {
 		[]int{3, 3},
 	}
 
-	C := A.Add(B)
+	C := A.Add(&B)
 	expected := Matrix{
 		[]float64{10, 10, 10, 10, 10, 10, 10, 10, 10},
 		[]int{3, 3},
@@ -94,5 +100,83 @@ func TestAdd(t *testing.T) {
 
 	if !reflect.DeepEqual(C.dims, expected.dims) {
 		t.Fatalf(`Expected dimensions %v, got %v`, expected.dims, C.dims)
+	}
+}
+
+// TestSet calles Matrix.Set with multidimensional coordinates 
+func TestSet(t *testing.T) {
+	t.Parallel()
+	matrix := Matrix{
+		[]float64{1, 2, 3, 4, 5, 6, 7, 8, 9},
+		[]int{3, 3},
+	}
+
+	tests := []struct {
+		coords   []int
+		value    float64
+		expected []float64
+	}{
+		{[]int{0, 0}, 10, []float64{10, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{[]int{1, 1}, 20, []float64{10, 2, 3, 4, 20, 6, 7, 8, 9}},
+		{[]int{2, 2}, 30, []float64{10, 2, 3, 4, 20, 6, 7, 8, 30}},
+	}
+
+	for _, test := range tests {
+		matrix.Set(test.coords, test.value)
+		if !reflect.DeepEqual(matrix.data, test.expected) {
+			t.Fatalf(`Failed to set value at %v. Expected %v, got %v`,
+				test.coords, test.expected, matrix.data)
+		}
+	}
+}
+
+// TestMultiply calles Matrix.Multiply with multidimensional coordinates
+func TestMultiply(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct{
+		name string
+		A *Matrix
+		B *Matrix
+		want *Matrix
+	}{
+		{
+			"2DShouldPass",
+			&Matrix{
+				[]float64{1, 2, 3, 4, 5, 6},
+				[]int{2, 3},
+			},
+			&Matrix{
+				[]float64{7, 10, 13},
+				[]int{3, 1},
+			},
+			&Matrix{
+				[]float64{66, 156},
+				[]int{2, 1},
+			},
+		},
+		{
+			"IdentityMatrix",
+			&Matrix{
+				[]float64{1, 0, 0, 0, 1, 0, 0, 0, 1},
+				[]int{3, 3},
+			},
+			&Matrix{
+				[]float64{7, 10, 13, 2, 90, 6},
+				[]int{3, 2},
+			},
+			&Matrix{
+				[]float64{7, 10, 13, 2, 90, 6},
+				[]int{2, 1},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		result := test.A.Multiply(test.B)
+		if !reflect.DeepEqual(result.data, test.want.data) {
+			t.Fatalf("\nTest case FAILED: %s\nExpected\n%s, got\n%s",
+				test.name, test.want.String(), result.String())
+		}
 	}
 }
