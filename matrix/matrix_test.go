@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -188,4 +189,27 @@ func TestMultiply(t *testing.T) {
 			}
 		})
 	}
+}
+
+// ===========================================================================
+func BenchmarkMultiply(b *testing.B) {
+	// Create two 500x500 matrices with random numbers between 0 and 20
+	A := &Matrix{
+		data: make([]float64, 500*500),
+		dims: []int{500, 500},
+	}
+	B := &Matrix{
+		data: make([]float64, 500*500),
+		dims: []int{500, 500},
+	}
+
+	// Fill the matrix with random numbers
+	for i := 0; i < len(A.data); i++ {
+		A.data[i] = rand.Float64() * 20
+		B.data[i] = rand.Float64() * 20
+	}
+
+    for i := 0; i < b.N; i++ {
+        A.Multiply(B)
+    }
 }
