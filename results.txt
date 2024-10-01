@@ -1,17 +1,44 @@
 BENCHMARK RESULTS FOR MATRIX MULTIPLICATION
-================================================================
-CMD
-go test -bench ^BenchmarkMultiply$ github.com/pforderique/markov_chain/matrix -benchtime 20s
-
+----------------------------------------------------------------
+ARCH
 goos: windows
 goarch: amd64
-pkg: github.com/pforderique/markov_chain/matrix
 cpu: Intel(R) Core(TM) i7-8650U CPU @ 1.90GHz
-BenchmarkMultiply-8   	       1	    5181308500 ns/op	     6021752 B/op	      19 allocs/op
-BenchmarkMultiply-8            2        5472945350 ns/op         4014164 B/op          5 allocs/op
-BenchmarkMultiply-8            4        6155239775 ns/op         3010634 B/op          4 allocs/op
-BenchmarkMultiply-8            7        5983780429 ns/op
-BenchmarkMultiply-8           10        7120151310 ns/op
-BenchmarkMultiply-8           10        6616815150 ns/op
+================================================================
+                    SquareMatrixMultiplySimple 1024x1024
+CMD
+go test -bench ^BenchmarkSqMultiply$ github.com/pforderique/markov_chain/linalg -benchtime 20s
 
-So Roughly 5.18s - 6.61s
+size: 1024
+
+BenchmarkSqMultiply-8       2        17817291900 ns/op
+BenchmarkSqMultiply-8       2        18426493750 ns/op
+
+So roughly 18s
+
+================================================================
+                    SquareMatrixMultiplyDense 1024x1024
+
+CMD
+go test -bench ^BenchmarkSqMultiply$ github.com/pforderique/markov_chain/linalg -benchtime 20s
+
+BenchmarkSqMultiply-8                  7        3036533357 ns/op
+BenchmarkSqMultiply-8                  7        2982871200 ns/op
+BenchmarkSqMultiply-8                  8        2759019462 ns/op
+
+So roughly 3s
+
+
+
+================================================================
+                    SquareMatrixMultiplySimple 2048x2048
+CMD
+go test -bench ^BenchmarkSqMultiply$ github.com/pforderique/markov_chain/linalg -benchtime 30s
+
+BenchmarkSqMultiply-8       1        397006680900 ns/op
+
+================================================================
+                    SquareMatrixMultiplyDense 2048x2048
+
+BenchmarkSqMultiply-8       2        23822602150 ns/op
+BenchmarkSqMultiply-8       3        20461343933 ns/op

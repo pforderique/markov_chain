@@ -1,4 +1,4 @@
-package matrix
+package linalg
 
 import (
 	"fmt"
@@ -135,3 +135,7 @@ func matrixMultiplySimple(A *Matrix, B *Matrix) *Matrix {
 	}
 	return &C
 }
+
+// func matrixMultiplyParallel(A *Matrix, B *Matrix) *Matrix {
+// 	// TODO: Research and implement me.
+// }

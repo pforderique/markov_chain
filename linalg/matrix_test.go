@@ -1,4 +1,4 @@
-package matrix
+package linalg
 
 import (
 	"math/rand"
@@ -193,14 +193,16 @@ func TestMultiply(t *testing.T) {
 
 // ===========================================================================
 func BenchmarkMultiply(b *testing.B) {
-	// Create two 500x500 matrices with random numbers between 0 and 20
+	size := 1024
+
+	// Create two size x size matrices with random numbers between 0 and 20
 	A := &Matrix{
-		data: make([]float64, 500*500),
-		dims: []int{500, 500},
+		data: make([]float64, size*size),
+		dims: []int{size, size},
 	}
 	B := &Matrix{
-		data: make([]float64, 500*500),
-		dims: []int{500, 500},
+		data: make([]float64, size*size),
+		dims: []int{size, size},
 	}
 
 	// Fill the matrix with random numbers
